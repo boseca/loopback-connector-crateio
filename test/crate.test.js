@@ -567,6 +567,60 @@ describe('crate', function () {
     }
   });
 
+  it('should refresh the table when new instance is created', function (done) {
+    Post.create({content: 'Hello'}, function (err, post) {
+      Post.findById(post.id, function (err, p) {
+        should.not.exist(err);
+        p.content.should.be.equal('Hello');
+        done();
+      });
+    });
+  });
+
+  it('should refresh the table when instance is updated', function (done) {
+    Post.create({content: 'Ping'}, function (err, post) {
+      if(err) return done(err);
+      post.content = 'Pong'
+      Post.updateOrCreate(post, function (err, p) {
+        if(err) return done(err);
+        Post.findById(post.id, function(err, p) {
+          should.not.exist(err);
+          p.content.should.be.equal('Pong');
+          done();
+        });
+      });
+    });
+  });
+
+  it('should refresh the table when instance is deleted', function (done) {
+    Post.create({content: 'Ping'}, function (err, post) {
+      if(err) return done(err);
+      Post.destroyAll(function (err, p) {
+        if(err) return done(err);
+        Post.count(function(err, count) {
+          should.not.exist(err);
+          count.should.be.equal(0);
+          done();
+        });
+      });
+    });
+  });
+
+  it('should not refresh the table when instance is created and "enableRefresh" is "false"', function (done) {
+    db.connector.settings.enableRefresh = false;
+    Post.create({content: 'Hello'}, function (err, post) {
+      if(err) return done(err);
+      Post.count({}, function(err,count){
+       if(err) return done(err);
+       try {
+         count.should.be.equal(0);
+         done();
+       } catch (e) {
+         done(e);
+       }
+      });
+    });
+  });
 
   after(function (done) {
     dropTestTables(done);

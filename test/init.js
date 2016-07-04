@@ -14,6 +14,7 @@ global.getConfig = function (options) {
   var dbConf = {
     host: config.host || 'localhost',
     port: config.port || 4200,
+    enableRefresh: config.enableRefresh || true
   };
   if (options) {
     for (var el in options) {
